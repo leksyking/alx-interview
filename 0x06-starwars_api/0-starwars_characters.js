@@ -4,23 +4,31 @@
  */
 
 const request = require('request');
-const filmNum = process.argv[2] + '/';
-const filmURL = 'https://swapi-api.hbtn.io/api/films/';
 
-// Makes API request, sets async to allow await promise
-request(filmURL + filmNum, async (err, res, body) => {
-  if (err) return console.error(err);
+const movieId = process.argv[2];
+const movieEndpoint = 'https://swapi-api.alx-tools.com/api/films/' + movieId;
 
-  const charURLList = JSON.parse(body).characters;
+function sendRequest (characterList, index) {
+  if (characterList.length === index) {
+    return;
+  }
 
-  for (const charURL of charURLList) {
-    await new Promise((resolve, reject) => {
-      request(charURL, (err, res, body) => {
-        if (err) return console.error(err);
+  request(characterList[index], (error, response, body) => {
+    if (error) {
+      console.log(error);
+    } else {
+      console.log(JSON.parse(body).name);
+      sendRequest(characterList, index + 1);
+    }
+  });
+}
 
-        console.log(JSON.parse(body).name);
-        resolve();
-      });
-    });
+request(movieEndpoint, (error, response, body) => {
+  if (error) {
+    console.log(error);
+  } else {
+    const characterList = JSON.parse(body).characters;
+
+    sendRequest(characterList, 0);
   }
 });
